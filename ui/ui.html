@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>Vintage Story Server Monitor</title>
+
+	<link rel="stylesheet" type="text/css" href="/ui.css"/>
+
+	<script type="text/javascript" src="/libs/jquery.js"></script>
+
+	<script type="text/javascript" src="/libs/reconnecting-websocket.js"></script>
+
+	<!-- Vue.js is *massive* overkill here, but this is based on the bones of a previous project. -->
+	<script type="text/javascript" src="/libs/vue.js"></script>
+
+	<script type="text/javascript" src="/ui.js"></script>
+</head>
+<body><div id="Main" class="page" v-on:mousemove="drag" v-on:mouseup="dragend"><!-- For simplicity this entire page is one giant Vue object. -->
+
+<input style="width:95%;" type="input" v-on:keyup.enter.prevent="submitCommand" v-model="command" />
+<textarea style="width:95%;height: 95%;" type="text" disabled v-model="logData"></textarea><br>
+<input type="button" v-on:click="settingsShow = true" value="Settings"/>
+
+<div id="SettingsBox" class="edit-box-backplate" v-show="settingsShow">
+	<div class="edit-box" v-bind:style="settingsPos">
+		<h3 class="edit-box-header" v-on:mousedown="begindrag(1)">Settings:</h3>
+		<table>
+			<tr><td style="width:25%;"><label class="edit-box-label">Address</label></td><td style="width:75%;"><input style="width:95%;" type="input" v-model="settings.Addr"/></td></tr>
+			<tr><td style="width:25%;"><label class="edit-box-label">Token</label></td><td style="width:75%;"><input style="width:95%;" type="input" v-model="settings.Token"/></td></tr>
+			<tr><td style="text-align: right;"><input type="button" value="OK" v-on:click="saveSettingsBox"></td><td><input type="button" value="Cancel" v-on:click="closeSettingsBox"></td></tr>
+		</table>
+	</div>
+</div>
+
+</div></body>
+</html>
