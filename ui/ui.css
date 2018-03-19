@@ -66,6 +66,24 @@ textarea {
 }
 
 
+.help {
+	position: fixed;
+
+	border-top: 3px solid #000;
+	border-bottom: 3px solid #000;
+	border-radius: 5px;
+	box-shadow: 0 2px 8px rgba(0, 0, 0, .33);
+
+	background: linear-gradient(to right, #0d0d0d 0%, #1c1917 24%, #1c1917 76%, #0d0d0d 100%);
+
+	margin: 5px 5px 5px 5px;
+
+	top: 10%;
+	left: 25%;
+	width: 50%;
+	height: 80%;
+}
+
 .edit-box {
 	position: fixed;
 

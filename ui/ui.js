@@ -34,6 +34,16 @@ $(document).ready(function() {
 		$("#SettingsBox").hide()
 	})
 
+	$("#HelpPanel").hide()
+	$("#ShowHelp").click(function(evnt) {
+		evnt.stopPropagation()
+		$("#HelpPanel").show()
+	})
+	$("#helpOK").click(function(evnt) {
+		evnt.stopPropagation()
+		$("#HelpPanel").hide()
+	})
+
 	$("#Command").on("keypress", function(evnt) {
 		if (evnt.which == 13) {
 			var el = $("#Command")[0]

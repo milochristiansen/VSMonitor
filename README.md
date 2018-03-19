@@ -17,7 +17,7 @@ Unpack the package into your Vintage Story directory for simplicity. You could u
 require more configuration.
 
 Next you need to start the monitor. Do not set any commandline options just yet. As soon as the monitor is up (which will
-be right away) open `https://localhost` in your web browser. The first thing you need to do is create an account for
+be right away) open `http://localhost` in your web browser. The first thing you need to do is create an account for
 yourself.
 
 In the input field at the top of the page, type `:token issue <username>`, replacing `<username>` with whatever you want.
@@ -32,13 +32,12 @@ Start the monitor with the following command line options (where `<username>` is
 
 	vs_monitor -admin="<username>" -host="<your domain name>"
 
-On Linux or OSX you may need to add `-bin="mono VintagestoryServer.exe"`, and you will need to run the monitor as root. Once
-the monitor is up, open the monitor UI in your web browser and type `:recover` to start the game server. If the monitor
-complains about an invalid token you need to set your token in the settings again. This will happen if you use the proper
-domain name to connect and is expected.
+On Linux or OSX you may need to add `mono VintagestoryServer.exe` to the end of your command line, and you will need to
+run the monitor as root. Once the monitor is up, open the monitor UI in your web browser and type `:recover` to start the
+game server. If the monitor complains about an invalid token you need to set your token in the settings again. This will
+happen if you use the proper domain name to connect instead of "localhost" and is expected.
 
-If you are connecting from a remote system you will need to copy over your token or issue a new one for that system, as well
-as setting the server address in the web UI settings page.
+If you are connecting from a remote system you will need to copy over your token or issue a new one for that system.
 
 Note: If there are services already using TCP ports 80 and 443, you will not be able to use automatic certificates. In
 this case provide the `-nocert` command line option, and put your certificate in `monitor/cert.key` and `monitor/cert.crt`.
@@ -59,3 +58,6 @@ If you want to restart the server, tell it to `/stop` via the monitor, then when
 
 If your server hangs and won't listen to commands, you can tell the monitor to `:kill server` and it will force it to
 shut down (hopefully).
+
+If you want to shut the monitor down just `:kill monitor`, this will stop the game server too, but it is strongly
+recommended you `/stop` it first even so.

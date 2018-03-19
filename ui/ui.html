@@ -19,10 +19,30 @@
 <div class="bottomrow">
 	<input id="Enter" value=">>>" type="button"/>
 	<input id="Command" type="input" />
+	<input id="ShowHelp" value="Help" type="button"/>
 	<input id="ShowSettings" value="☼" type="button"/>
 </div>
 
-<!-- TODO: Make dragable again. -->
+<div id="HelpPanel" class="edit-box-backplate">
+<div class="help">
+	Buttons:<br>
+	<ul>
+		<li>☼: Settings, set your API token here.</li>
+		<li>>>>: Send command to server, does the same thing as pressing "enter".</li>
+	</ul>
+
+	Commands:<br>
+	There are three special commands for the monitor, everything else is sent to the server. These commands are:<br>
+	<ul>
+		<li><code>:recover</code>: Starts the game server.</li>
+		<li><code>:kill (server|monitor)</code>: Shutdown the monitor or kill a misbehaving game server.</li>
+		<li><code>:token (issue|revoke) username</code> Issue or revoke the token for the given username. Administrator only.</li>
+	</ul>
+
+	<p><input id="helpOK" type="button" value="OK">
+</div>
+</div>
+
 <div id="SettingsBox" class="edit-box-backplate">
 	<div class="edit-box" style="top: 45%; left: 45%;">
 		<h3 class="edit-box-header" v-on:mousedown="begindrag(1)">Settings:</h3>
