@@ -58,21 +58,26 @@ const (
 )
 
 var (
-	serverBinary = "VintagestoryServer.exe"
+	serverBinary = []string{}
 	host         = "localhost"
-	port         = "443"
+	port         = "2660"
 	admin        = ""
 	noAutoCert   = false
 )
 
 func main() {
-	flag.StringVar(&serverBinary, "bin", serverBinary, "Command to start the server. Defaults to listening on 80/443 unless -nocert is set.")
 	flag.StringVar(&host, "host", host, "Host name of the server running the monitor. If 'localhost' then HTTP will be used instead of HTTPS.")
-	flag.StringVar(&port, "port", port, "Port to listen on when -nocert is set or when listening on localhost.")
+	flag.StringVar(&port, "port", port, "Port to listen on when -nocert is set or when listening on localhost (default is 2660.")
 	flag.BoolVar(&noAutoCert, "nocert", noAutoCert, "If set a certificate will *not* be automatically acquired from Let's Encrypt.")
 	flag.StringVar(&admin, "admin", admin, "The administrator user. If unset or invalid anyone can carry out admin functions.")
 
 	flag.Parse()
+
+	serverBinary = flag.Args()
+
+	if len(serverBinary) == 0 {
+		serverBinary = []string{"VintagestoryServer.exe"}
+	}
 
 	ichan := make(chan io.WriteCloser)
 	ochan := make(chan io.ReadCloser)
@@ -135,7 +140,11 @@ func main() {
 				case "monitor":
 					os.Exit(0)
 				case "server":
-					kill <- true
+					if isDown {
+						kill <- true
+					} else {
+						log("Monitor Error: Server is already down.\n")
+					}
 				default:
 					log(":kill (monitor|server)\n")
 				}
@@ -151,8 +160,9 @@ func main() {
 					log(":token (issue|revoke) username\n")
 					continue
 				}
-				if admin != "" || user != admin {
+				if admin != "" && user != admin {
 					log(":token is an administrator only command.\n")
+					return
 				}
 
 				switch commandBits[1] {
@@ -309,7 +319,12 @@ func restartLoop(restart chan bool, kill chan bool, down chan bool, ichan chan i
 		restarts[len(restarts)-1] = time.Now()
 
 		log("Monitor (re)starting server...\n")
-		cmd := exec.Command(serverBinary)
+		bin := serverBinary[0]
+		var args []string
+		if len(serverBinary) > 1 {
+			args = serverBinary[1:]
+		}
+		cmd := exec.Command(bin, args...)
 
 		ipipe, err := cmd.StdinPipe()
 		if err != nil {
