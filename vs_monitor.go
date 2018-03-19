@@ -129,7 +129,7 @@ func main() {
 
 			switch commandBits[0] {
 			case ":help":
-				log("Monitor commands: :recover, :kill, :token\n")
+				log("Monitor commands:\n:recover,\n:kill (monitor|server)\n:token (issue|revoke) username\n")
 			case ":kill":
 				if len(commandBits) != 2 {
 					log(":kill (monitor|server)\n")
@@ -138,6 +138,7 @@ func main() {
 
 				switch commandBits[1] {
 				case "monitor":
+					log("Monitor shutting down.\n")
 					os.Exit(0)
 				case "server":
 					if isDown {

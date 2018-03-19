@@ -17,11 +17,29 @@ body {
 
 	font-family: 'Roboto', sans-serif;
 	font-size: 9pt;
+
+	flex: 1;
+	display: flex;
+	flex-direction: column;
 }
 
-#Main {
-	width: 100%;
-	height: 100%;
+.bottomrow {
+	flex: 0 1 auto;
+
+	border-top: solid black 2px;
+
+	display: flex;
+	flex-direction: row;
+}
+
+#Command {
+	flex: 1;
+	border-left: solid black 2px;
+	border-right: solid black 2px;
+}
+
+#Output {
+	flex: 1;
 }
 
 input {
@@ -32,6 +50,8 @@ input {
 textarea {
 	color: #202020;
 	background: #868685;
+
+	flex: 1;
 }
 
 ::-webkit-scrollbar {
