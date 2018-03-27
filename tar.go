@@ -61,12 +61,13 @@ func ExtractTar(r io.Reader, to string) error {
 			if err != nil {
 				return err
 			}
-			defer file.Close()
 
 			_, err = io.Copy(file, tr)
 			if err != nil {
+				file.Close()
 				return err
 			}
+			file.Close()
 		default:
 			return tarUnknownTypeErr
 		}

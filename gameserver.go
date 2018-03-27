@@ -165,9 +165,23 @@ func (sc *ServerControler) restartLoop() {
 			return
 		}
 		sd.RLock()
-		bin += fmt.Sprintf("/%v/VintagestoryServer.exe", sd.Version)
-		dat += fmt.Sprintf("/%v %v", sd.Name, sd.SID)
+		ver := sd.Version
+		name := sd.Name
+		sid := sd.SID
 		sd.RUnlock()
+		sc.c.RLock()
+		verinfo := sc.c.Versions[ver]
+		sc.c.RUnlock()
+		if verinfo != BinaryOK {
+			err := sc.c.FindOrDownload(ver)
+			sc.log("Could not restart server (downloading binaries): %v", err)
+			sc.log("Server is DOWN, awaiting :recover command.")
+			autostart = false
+			continue
+		}
+
+		bin += fmt.Sprintf("/%v/VintagestoryServer.exe", ver)
+		dat += fmt.Sprintf("/%v %v", name, sid)
 
 		// And run the server!
 		// HACK! But I'm feeling lazy, have pity on me.

@@ -58,8 +58,6 @@ body {
 	flex: 1;
 	display: flex;
 	flex-direction: column;
-
-	overflow: auto;
 }
 
 #content div.tab {
@@ -71,6 +69,7 @@ body {
 .output {
 	background: linear-gradient(to bottom, #868685 0%, #565655 24%, #565655 76%, #868685 100%);
 
+	overflow: auto;
 	flex: 1;
 }
 

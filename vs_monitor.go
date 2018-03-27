@@ -119,7 +119,7 @@ func main() {
 
 func webUI(host, port string, autotls bool) {
 	FS := new(axis2.FileSystem)
-	FS.Mount("", sources.NewOSDir(baseDir()+"/monitor/ui"), false)
+	FS.Mount("", sources.NewOSDir(baseDir()+"/Monitor/ui"), false)
 
 	http.HandleFunc("/socket", GlobalSockets.Upgrade)
 

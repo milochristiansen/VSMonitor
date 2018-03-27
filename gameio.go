@@ -75,7 +75,8 @@ type LogMessage struct {
 	Message string
 }
 
-var loglineRe = regexp.MustCompile(`([0-9]+\.[0-9]+\.[0-9]+ [0-9]+:[0-9]+:[0-9]+) \[([a-zA-Z]+)\] (.*)\n`)
+//var loglineRe = regexp.MustCompile(`([0-9]+\.[0-9]+\.[0-9]+ [0-9]+:[0-9]+:[0-9]+) \[([a-zA-Z ]+)\] (.*)\n`)
+var loglineRe = regexp.MustCompile(`([0-9]+:[0-9]+:[0-9]+) \[([a-zA-Z ]+)\] (.*)\n`)
 
 func (sc *ServerControler) logParser() {
 	var rdr io.ReadCloser
@@ -112,7 +113,8 @@ func (sc *ServerControler) logParser() {
 			// 1: time
 			// 2: class
 			// 3: message
-			t, err := time.Parse("2.1.2006 15:04:05", matches[1])
+			//t, err := time.Parse("2.1.2006 15:04:05", matches[1])
+			t, err := time.Parse("15:04:05", matches[1])
 			if err != nil {
 				sc.logs <- &LogMessage{sc.sid, time.Now(), ErrorClass, err.Error()}
 				t = time.Now()
