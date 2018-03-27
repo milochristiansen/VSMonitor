@@ -4,7 +4,7 @@
 	<meta charset="utf-8">
 	<title>Vintage Story Server Monitor</title>
 
-	<link rel="stylesheet" type="text/css" href="/ui.css"/>
+	<link rel="stylesheet" type="text/css" href="./ui.css"/>
 
 	<script type="text/javascript" src="/libs/jquery.js"></script>
 
@@ -14,40 +14,36 @@
 </head>
 <body>
 
-<!-- TODO: Fix layout -->
-<textarea id="Output" type="text" disabled></textarea>
+<ul id="tabs">
+</ul>
+<div id="content">
+</div>
 <div class="bottomrow">
-	<input id="Enter" value=">>>" type="button"/>
-	<input id="Command" type="input" />
 	<input id="ShowHelp" value="Help" type="button"/>
-	<input id="ShowSettings" value="☼" type="button"/>
+	<input id="ShowSettings" value="Settings" type="button"/>
 </div>
 
-<div id="HelpPanel" class="edit-box-backplate">
+<div id="HelpPanel" class="box-backplate">
 <div class="help">
-	Buttons:<br>
-	<ul>
-		<li>☼: Settings, set your API token here.</li>
-		<li>>>>: Send command to server, does the same thing as pressing "enter".</li>
-	</ul>
-
 	Commands:<br>
-	There are three special commands for the monitor, everything else is sent to the server. These commands are:<br>
+	There are several special commands for the monitor, everything else is sent to the server. These commands are:<br>
 	<ul>
-		<li><code>:recover</code>: Starts the game server.</li>
-		<li><code>:kill (server|monitor)</code>: Shutdown the monitor or kill a misbehaving game server.</li>
-		<li><code>:token (issue|revoke) username</code> Issue or revoke the token for the given username. Administrator only.</li>
+		<li><code>:recover</code>: Start a currently down game server.</li>
+		<li><code>:server create \"name\" [stable|unstable|x.x.x.x]</code>: Create a new server.</li>
+		<li><code>:server update [x.x.x.x]</code>: Update the current server (does not work in the monitor tab).</li>
+		<li><code>:kill (monitor|server)</code>: Shutdown the monitor or kill a misbehaving game server.</li>
+		<li><code>:user (create|delete) "name"</code>: Create or delete a user.</li>
 	</ul>
 
 	<p><input id="helpOK" type="button" value="OK">
 </div>
 </div>
 
-<div id="SettingsBox" class="edit-box-backplate">
-	<div class="edit-box" style="top: 45%; left: 45%;">
-		<h3 class="edit-box-header" v-on:mousedown="begindrag(1)">Settings:</h3>
+<div id="SettingsBox" class="box-backplate">
+	<div class="settings" style="top: 45%; left: 45%;">
+		<h3 class="box-header" v-on:mousedown="begindrag(1)">Settings:</h3>
 		<table>
-			<tr><td style="width:25%;"><label class="edit-box-label">Token</label></td><td style="width:75%;"><input id="sToken" style="width:95%;" type="input"/></td></tr>
+			<tr><td style="width:25%;"><label class="box-label">Token</label></td><td style="width:75%;"><input id="sToken" style="width:95%;" type="input"/></td></tr>
 			<tr><td style="text-align: right;"><input id="sOK" type="button" value="OK"></td><td><input id="sCancel" type="button" value="Cancel"></td></tr>
 		</table>
 	</div>

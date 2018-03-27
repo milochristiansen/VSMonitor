@@ -16,42 +16,106 @@ body {
 	height: calc(100% - 1em);
 
 	font-family: 'Roboto', sans-serif;
-	font-size: 9pt;
+	font-size: 12pt;
 
+	display: flex;
+	flex-direction: column;
+}
+
+#tabs {
+	flex: 0 1 auto;
+	display: flex;
+	flex-direction: row;
+}
+
+#tabs {
+	margin:0;
+	padding:0;
+	list-style:none;
+	overflow:hidden;
+}
+#tabs li {
+	float:left;
+	display:block;
+	padding:5px;
+	margin-right:5px;
+
+	background: linear-gradient(to right, #0d0d0d 0%, #1c1917 24%, #1c1917 76%, #0d0d0d 100%);
+}
+#tabs li a {
+	color:#fff;
+	text-decoration:none;
+}
+#tabs li.current {
+	background: linear-gradient(to bottom, #868685 0%, #565655 24%, #565655 76%, #868685 100%);
+}
+#tabs li.current a {
+	color:#000;
+	text-decoration:none;
+}
+
+#content {
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+
+	overflow: auto;
+}
+
+#content div.tab {
 	flex: 1;
 	display: flex;
 	flex-direction: column;
 }
 
+.output {
+	background: linear-gradient(to bottom, #868685 0%, #565655 24%, #565655 76%, #868685 100%);
+
+	flex: 1;
+}
+
+.log-time {
+	color:#400;
+}
+
+.log-message {
+	color:#222;
+}
+
+.log-class {
+	color:#000;
+}
+
+.log-Monitor {color:#004;}
+.log-Monitor-Error {color:#600;}
+
+.log-Server-Notification {color:#060;}
+.log-Server-Event {color:#060;}
+.log-Server-Debug {color:#333;}
+.log-Server-Verbose-Debug {color:#333;}
+.log-Server-Chat {color:#333;}
+.log-Server-Build {color:#333;}
+.log-Server-Error {color:#600;}
+.log-Server-Fatal {color:#600;}
+.log-Server-Warning {color:#660;}
+
 .bottomrow {
 	flex: 0 1 auto;
 
-	border-top: solid black 2px;
+	margin-top: 2px;
 
 	display: flex;
 	flex-direction: row;
 }
 
-#Command {
-	flex: 1;
-	border-left: solid black 2px;
-	border-right: solid black 2px;
-}
-
-#Output {
+.commandline {
 	flex: 1;
 }
 
 input {
 	color: #202020;
 	background: #868685;
-}
-
-textarea {
-	color: #202020;
-	background: #868685;
-
-	flex: 1;
+	margin-right: 2px;
 }
 
 ::-webkit-scrollbar {
@@ -81,10 +145,9 @@ textarea {
 	top: 10%;
 	left: 25%;
 	width: 50%;
-	height: 80%;
 }
 
-.edit-box {
+.settings {
 	position: fixed;
 
 	border-top: 3px solid #000;
@@ -99,7 +162,7 @@ textarea {
 	width: 25%;
 }
 
-.edit-box-header {
+.box-header {
 	margin: 0px 0px 0px 0px;
 	padding: 0px 0px 0px 5px;
 	background: #ddd;
@@ -108,12 +171,12 @@ textarea {
 	user-select: none;
 }
 
-.edit-box-label {
+.box-label {
 	cursor: default;
 	user-select: none;
 }
 
-.edit-box-backplate {
+.box-backplate {
 	z-index: 9998;
 
 	position: fixed;
