@@ -66,7 +66,6 @@ $(document).ready(function() {
 	$('#tabs').on('click', "a.tab", function() {
 		// Get the tab name
 		var sid = $(this).attr("id")
-		console.log(sid)
 
 		// hide all other tabs
 		$("#content div.tab").hide()
@@ -78,7 +77,7 @@ $(document).ready(function() {
 	})
 
 	$('#content').on('click', "div.tab", function() {
-		if (typeof document.selection != "undefined") {
+		if (window.getSelection().type == "Range") {
 			return
 		}
 
@@ -112,6 +111,7 @@ $(document).ready(function() {
 	Conn = new ReconnectingWebSocket((window.location.protocol == "https:" ? "wss://" : "ws://")+window.location.host+"/socket")
 	Conn.onmessage = function(evnt) {
 		var msg = JSON.parse(evnt.data)
+		
 		if (msg.Class == "Monitor Init") {
 			makeTab(msg.SID, msg.Message)
 			return
@@ -120,6 +120,10 @@ $(document).ready(function() {
 		msg.At = new Date(msg.At).toLocaleTimeString()
 
 		var el = $(`#content #${msg.SID} .output`)
+		if (el.length == 0) {
+			return
+		}
+
 		el.append(`<div><span class="log-time">${msg.At}</span> <span class="log-class log-${msg.Class.replace(" ", "-")}">[${msg.Class}]:</span> <span class="log-message">${msg.Message}</span></div>`)
 		
 		// Don't autoscroll if the user isn't at the bottom.
@@ -128,6 +132,9 @@ $(document).ready(function() {
 		if (at >= el.scrollHeight - 60) {
 			el.scrollTop = el.scrollHeight
 		}
+	}
+	Conn.onopen = function(evnt) {
+		Conn.send(`{"SID": 0, "Token": "${Settings.Token}", "Command": ":auth"}`)
 	}
 
 	$("#SettingsBox").hide()

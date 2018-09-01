@@ -36,9 +36,9 @@ From the new tab, simply run `:recover` to start the server.
 To update your server, simply `/stop` it and `:server update`, then `:recover` when the monitor is done downloading
 the new version.
 
-Running multiple servers is a bit harder, since each server needs its own port. You will need to start the server at
-least once, then edit the server's configuration file. By default this will be in `./GameData/<server name> <SID>`
-where `<server name` is the name you specified when you created the server, and `<SID>` is a unique server ID number.
+Running multiple servers is a bit harder, since each server needs its own port. You will need to edit the server's
+configuration file. By default this will be in `./GameData/<server name> <SID>` where `<server name` is the name you
+	specified when you created the server, and `<SID>` is a unique server ID number.
 
 
 When the Server Goes Down
@@ -46,7 +46,7 @@ When the Server Goes Down
 
 If something happens to your Vintage Story server and it crashes, don't worry! The monitor will restart it no problem.
 
-If it crashes again immediately, the monitor will just start it again unless it crashes 3 times in 15 seconds, in which
+If it crashes again immediately, the monitor will just start it again unless it crashes 3 times in 60 seconds, in which
 case it will stop trying and wait for you.
 
 Once you fix whatever the problem was, simply tell the monitor to `:recover` and it will relaunch the game server.
@@ -84,7 +84,7 @@ Messages from the monitor use the following format:
   to in the case of messages from the monitor). SID 0 is used for monitor commands only, it is not backed by an actual
   server.
 * `AT`: A RFC3339 formatted message timestamp.
-* `Class`: The log message class. Most are from the game, but `"Monitor"`, `"MonitorError"`, and `"MonitorInit"` are
+* `Class`: The log message class. Most are from the game, but `"Monitor"`, `"Monitor Error"`, and `"Monitor Init"` are
   used for messages from the monitor.
 * `Message`: The log message being reported.
 

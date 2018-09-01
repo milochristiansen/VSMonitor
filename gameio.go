@@ -27,7 +27,7 @@ import "time"
 import "bufio"
 import "regexp"
 
-func (sc *ServerControler) logTransmitter() {
+func (sc *ServerController) logTransmitter() {
 	for {
 		log, ok := <-sc.logs
 		if !ok {
@@ -37,7 +37,7 @@ func (sc *ServerControler) logTransmitter() {
 	}
 }
 
-func (sc *ServerControler) commandStuffer() {
+func (sc *ServerController) commandStuffer() {
 	var wrt io.WriteCloser
 	ok := false
 	for {
@@ -78,7 +78,7 @@ type LogMessage struct {
 //var loglineRe = regexp.MustCompile(`([0-9]+\.[0-9]+\.[0-9]+ [0-9]+:[0-9]+:[0-9]+) \[([a-zA-Z ]+)\] (.*)\n`)
 var loglineRe = regexp.MustCompile(`([0-9]+:[0-9]+:[0-9]+) \[([a-zA-Z ]+)\] (.*)\n`)
 
-func (sc *ServerControler) logParser() {
+func (sc *ServerController) logParser() {
 	var rdr io.ReadCloser
 	ok := false
 	last := time.Now()
@@ -114,7 +114,7 @@ func (sc *ServerControler) logParser() {
 			// 2: class
 			// 3: message
 			//t, err := time.Parse("2.1.2006 15:04:05", matches[1])
-			t, err := time.Parse("15:04:05", matches[1])
+			t, err := time.ParseInLocation("15:04:05", matches[1], time.Local)
 			if err != nil {
 				sc.logs <- &LogMessage{sc.sid, time.Now(), ErrorClass, err.Error()}
 				t = time.Now()

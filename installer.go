@@ -25,11 +25,16 @@ package main
 import "os"
 import "io"
 import "fmt"
+import "time"
 import "bytes"
 import "errors"
+import "context"
+import "runtime"
+import "os/exec"
 import "net/http"
 import "io/ioutil"
 import "crypto/md5"
+import "encoding/hex"
 
 const (
 	vUnstableURL = "http://api.vintagestory.at/latestunstable.txt"
@@ -40,12 +45,12 @@ const (
 	catalog2URL = "http://api.vintagestory.at/unstable.json"
 )
 
-var versionFetchError = errors.New("Error parsing retrieved version information, too few parts.")
+var versionFetchError = errors.New("Error parsing retrieved version information.")
 var invalidSIDError = errors.New("Invalid or non-existent SID.")
 var versionValidError = errors.New("Version validation failed.")
 var md5ValidError = errors.New("MD5 validation failed.")
 
-func GetLatestGameVersion(stable bool) (GameVersion, error) {
+func GetLatestGameVersion(stable bool) (string, error) {
 	url := vStableURL
 	if !stable {
 		url = vUnstableURL
@@ -64,7 +69,7 @@ func GetLatestGameVersion(stable bool) (GameVersion, error) {
 	if err != nil {
 		return ErrorVersion, err
 	}
-	return GameVersion(bytes.TrimSpace(buf)), nil
+	return string(bytes.TrimSpace(buf)), nil
 }
 
 func (c *MonitorConfig) InstallNewServer(stable bool, name string) (sid int, err error) {
@@ -76,11 +81,11 @@ func (c *MonitorConfig) InstallNewServer(stable bool, name string) (sid int, err
 	return c.installNewServer(ver, stable, name)
 }
 
-func (c *MonitorConfig) InstallNewServerVersion(ver GameVersion, name string) (sid int, err error) {
+func (c *MonitorConfig) InstallNewServerVersion(ver string, name string) (sid int, err error) {
 	return c.installNewServer(ver, true, name)
 }
 
-func (c *MonitorConfig) installNewServer(ver GameVersion, stable bool, name string) (sid int, err error) {
+func (c *MonitorConfig) installNewServer(ver string, stable bool, name string) (sid int, err error) {
 	c.Lock()
 	c.LastSID++
 	sid = c.LastSID
@@ -90,9 +95,35 @@ func (c *MonitorConfig) installNewServer(ver GameVersion, stable bool, name stri
 		Version: ver,
 		Stable:  stable,
 	}
+	os.Mkdir(fmt.Sprintf("%v/%v %v", c.DataDir, name, sid), 0755) // Ignore error.
+	bin := c.ServerDir
+	dat := c.DataDir
 	c.Unlock()
 
-	return sid, c.FindOrDownload(ver)
+	err = c.FindOrDownload(ver)
+	if err != nil {
+		return sid, err
+	}
+
+	bin += fmt.Sprintf("/%v/VintagestoryServer.exe", ver)
+	dat += fmt.Sprintf("/%v %v", name, sid)
+
+	// HACK! But I'm feeling lazy, have pity on me.
+	// This has a deadline to keep old versions that do not support --genconfig from hanging forever.
+	var cmd *exec.Cmd
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	if runtime.GOOS == "windows" {
+		cmd = exec.CommandContext(ctx, bin, "--dataPath", dat, "--genconfig")
+	} else {
+		cmd = exec.CommandContext(ctx, "mono", bin, "--dataPath", dat, "--genconfig")
+	}
+
+	err = cmd.Run()
+	if ctx.Err() == context.DeadlineExceeded {
+		return sid, nil
+	}
+	return sid, err
 }
 
 func (c *MonitorConfig) UpdateServer(sid int) error {
@@ -114,7 +145,7 @@ func (c *MonitorConfig) UpdateServer(sid int) error {
 	return c.UpdateServerTo(ver, sid)
 }
 
-func (c *MonitorConfig) UpdateServerTo(ver GameVersion, sid int) error {
+func (c *MonitorConfig) UpdateServerTo(ver string, sid int) error {
 	c.RLock()
 	sc, ok := c.Servers[sid]
 	c.RUnlock()
@@ -128,10 +159,15 @@ func (c *MonitorConfig) UpdateServerTo(ver GameVersion, sid int) error {
 	return c.FindOrDownload(ver)
 }
 
-func (c *MonitorConfig) FindOrDownload(ver GameVersion) error {
-	ok, stable, file, srmd5 := ver.Validate()
+func (c *MonitorConfig) FindOrDownload(ver string) error {
+	ok, stable, file, srmd5 := ValidateVersion(ver)
 	if !ok {
 		return versionValidError
+	}
+	srsum := make([]byte, 16)
+	l, err := hex.Decode(srsum, srmd5)
+	if err != nil || l != 16 {
+		return md5ValidError
 	}
 
 	c.RLock()
@@ -145,7 +181,7 @@ func (c *MonitorConfig) FindOrDownload(ver GameVersion) error {
 	dir := c.ServerDir
 	c.Unlock()
 
-	dir += "/" + string(ver)
+	dir += "/" + ver
 	removeContents(dir) // Ignore errors here.
 
 	s := "stable"
@@ -174,12 +210,12 @@ func (c *MonitorConfig) FindOrDownload(ver GameVersion) error {
 		return err
 	}
 	dlsum := dlmd5.Sum(nil)
-	if len(dlsum) != md5.Size || len(srmd5) != md5.Size {
-		//return md5ValidError
+	if len(dlsum) != md5.Size || len(srsum) != md5.Size {
+		return md5ValidError
 	}
 	for i := 0; i < md5.Size; i++ {
-		if dlsum[i] != srmd5[i] {
-			//return md5ValidError
+		if dlsum[i] != srsum[i] {
+			return md5ValidError
 		}
 	}
 	rdr := bytes.NewReader(buff.Bytes())

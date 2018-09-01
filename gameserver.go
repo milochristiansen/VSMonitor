@@ -31,10 +31,10 @@ import "sync/atomic"
 
 const (
 	countRestarts = 3
-	loopThreshold = 15 * time.Second
+	loopThreshold = 60 * time.Second
 )
 
-type ServerControler struct {
+type ServerController struct {
 	c   *MonitorConfig
 	sid int
 
@@ -49,9 +49,9 @@ type ServerControler struct {
 	isalive *int32 // Is the monitor loop running?
 }
 
-// NewServerControler creates a new server control instance.
-func (c *MonitorConfig) NewServerControler(sid int) *ServerControler {
-	sc := &ServerControler{
+// NewServerController creates a new server control instance.
+func (c *MonitorConfig) NewServerController(sid int) *ServerController {
+	sc := &ServerController{
 		c:       c,
 		sid:     sid,
 		logs:    make(chan *LogMessage, 16),
@@ -81,7 +81,7 @@ func (c *MonitorConfig) NewServerControler(sid int) *ServerControler {
 }
 
 // Kill orders the server to shutdown when up. Returns false if the server is not up.
-func (sc *ServerControler) Kill() bool {
+func (sc *ServerController) Kill() bool {
 	if atomic.LoadInt32(sc.isup) != 0 && atomic.LoadInt32(sc.isalive) != 0 {
 		sc.kill <- true // You can send false to exit the controller loop too.
 		return true
@@ -90,7 +90,7 @@ func (sc *ServerControler) Kill() bool {
 }
 
 // Start orders the server to start when down. Returns false if the server is not down.
-func (sc *ServerControler) Start() bool {
+func (sc *ServerController) Start() bool {
 	if atomic.LoadInt32(sc.isup) == 0 && atomic.LoadInt32(sc.isalive) != 0 {
 		sc.restart <- true
 		return true
@@ -99,19 +99,19 @@ func (sc *ServerControler) Start() bool {
 }
 
 // IsUp returns true if the server is running.
-func (sc *ServerControler) IsUp() bool {
+func (sc *ServerController) IsUp() bool {
 	return atomic.LoadInt32(sc.isup) != 0
 }
 
 // IsAlive returns true if the monitor loop is running.
-func (sc *ServerControler) IsAlive() bool {
+func (sc *ServerController) IsAlive() bool {
 	return atomic.LoadInt32(sc.isalive) != 0
 }
 
 // Command sends a command to the server if it is running and returns true if the command was sent.
 // WARNING: Just because this returns true does not mean the command was sent to the server, it just
 // means it *probably* was sent.
-func (sc *ServerControler) Command(cmd string) bool {
+func (sc *ServerController) Command(cmd string) bool {
 	if atomic.LoadInt32(sc.isup) != 0 && atomic.LoadInt32(sc.isalive) != 0 {
 		sc.cmds <- cmd
 		return true
@@ -119,11 +119,12 @@ func (sc *ServerControler) Command(cmd string) bool {
 	return false
 }
 
-func (sc *ServerControler) log(f string, v ...interface{}) {
+// controller
+func (sc *ServerController) log(f string, v ...interface{}) {
 	sc.logs <- &LogMessage{sc.sid, time.Now(), MonitorClass, fmt.Sprintf(f, v...)}
 }
 
-func (sc *ServerControler) restartLoop() {
+func (sc *ServerController) restartLoop() {
 	atomic.StoreInt32(sc.isalive, -1)
 
 	var restarts [countRestarts]time.Time

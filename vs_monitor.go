@@ -57,9 +57,9 @@ func main() {
 			Port:             "2660",
 			AutoTLS:          false,
 			Servers:          make(map[int]*ServerConfig),
-			Versions:         make(map[GameVersion]BinaryStatus),
-			Tokens:           make(map[string]MonitorUser),
-			LaunchedHandlers: make(map[int]*ServerControler),
+			Versions:         make(map[string]BinaryStatus),
+			Tokens:           make(map[string]*MonitorUser),
+			LaunchedHandlers: make(map[int]*ServerController),
 		}
 		err := os.Mkdir(cfg.ServerDir, 0755)
 		if err != nil && !os.IsExist(err) {
@@ -88,9 +88,9 @@ func main() {
 
 	cfg := &MonitorConfig{
 		Servers:          make(map[int]*ServerConfig),
-		Versions:         make(map[GameVersion]BinaryStatus),
-		Tokens:           make(map[string]MonitorUser),
-		LaunchedHandlers: make(map[int]*ServerControler),
+		Versions:         make(map[string]BinaryStatus),
+		Tokens:           make(map[string]*MonitorUser),
+		LaunchedHandlers: make(map[int]*ServerController),
 	}
 	dec := json.NewDecoder(cfgf)
 	err = dec.Decode(&cfg)
@@ -104,7 +104,7 @@ func main() {
 	// Spin up controllers for each defined server.
 	cfg.Lock()
 	for sid := range cfg.Servers {
-		cfg.LaunchedHandlers[sid] = cfg.NewServerControler(sid)
+		cfg.LaunchedHandlers[sid] = cfg.NewServerController(sid)
 	}
 	cfg.Unlock()
 

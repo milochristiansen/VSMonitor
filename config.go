@@ -25,10 +25,10 @@ package main
 import "os"
 import "sync"
 import "errors"
-import "strconv"
-import "strings"
 import "net/http"
 import "encoding/json"
+
+//import "github.com/blang/semver"
 
 var unmarshalVersionError = errors.New("Could not unmarshal version number.")
 
@@ -49,13 +49,13 @@ type MonitorConfig struct {
 	Servers map[int]*ServerConfig
 
 	// What versions of the game are currently installed and what is their status.
-	Versions map[GameVersion]BinaryStatus
+	Versions map[string]BinaryStatus
 
 	// Tokens to users.
-	Tokens map[string]MonitorUser
+	Tokens map[string]*MonitorUser
 
 	// Servers that currently have running monitors.
-	LaunchedHandlers map[int]*ServerControler `json:"-"`
+	LaunchedHandlers map[int]*ServerController `json:"-"`
 
 	sync.RWMutex `json:"-"`
 }
@@ -81,7 +81,7 @@ func (c *MonitorConfig) Dump() error {
 type MonitorUser struct {
 	Name    string
 	IsAdmin bool
-	// TODO: More permissions.
+	Servers map[int]bool
 }
 
 // BinaryStatus is the status of a set of server binaries.
@@ -96,71 +96,26 @@ const (
 // ServerConfig tracks information for individual servers.
 type ServerConfig struct {
 	SID     int
-	Name    string      // Server data is stored in: DataDir/Name_SID
-	Version GameVersion // The current version used for this server.
-	Stable  bool        // Should this server track stable or unstable versions?
+	Name    string // Server data is stored in: DataDir/Name_SID
+	Version string // The current version used for this server.
+	Stable  bool   // Should this server track stable or unstable versions?
 
 	sync.RWMutex `json:"-"`
 }
 
-type GameVersion string
+var ErrorVersion = "-1.-1.-1.-1"
 
-var ErrorVersion = GameVersion("-1.-1.-1.-1")
-
-func (v GameVersion) Ints() (int, int, int, int) {
-	parts := strings.SplitN(string(v), ".", 4)
-	if len(parts) != 4 {
-		return -1, -1, -1, -1
-	}
-
-	a, err := strconv.Atoi(parts[0])
-	if err != nil {
-		return -1, -1, -1, -1
-	}
-	b, err := strconv.Atoi(parts[0])
-	if err != nil {
-		return -1, -1, -1, -1
-	}
-	c, err := strconv.Atoi(parts[0])
-	if err != nil {
-		return -1, -1, -1, -1
-	}
-	d, err := strconv.Atoi(parts[0])
-	if err != nil {
-		return -1, -1, -1, -1
-	}
-	return a, b, c, d
-}
-
-// Newer returns true if v2 is a newer version than v1
-func (v GameVersion) Newer(v2 GameVersion) bool {
-	w, x, y, z := v.Ints()
-	a := [4]int{w, x, y, z}
-	w, x, y, z = v2.Ints()
-	b := [4]int{w, x, y, z}
-
-	for i := 0; i < 4; i++ {
-		if a[i] < b[i] {
-			return false
-		}
-		if a[i] > b[i] {
-			return true
-		}
-	}
-	return false
-}
-
-// Validate checks if the game version could be found in the version catalog.
-func (v GameVersion) Validate() (ok bool, stable bool, file string, md5 []byte) {
-	ok, file, md5 = v.validate(catalog1URL)
+// ValidateVersion checks if the game version could be found in the version catalog.
+func ValidateVersion(v string) (ok bool, stable bool, file string, md5 []byte) {
+	ok, file, md5 = validateVersion(catalog1URL, v)
 	if ok {
 		return ok, true, file, md5
 	}
-	ok, file, md5 = v.validate(catalog2URL)
+	ok, file, md5 = validateVersion(catalog2URL, v)
 	return ok, false, file, md5
 }
 
-func (v GameVersion) validate(url string) (bool, string, []byte) {
+func validateVersion(url string, v string) (bool, string, []byte) {
 	client := new(http.Client)
 	r, err := client.Get(url)
 	if r != nil {
@@ -177,18 +132,18 @@ func (v GameVersion) validate(url string) (bool, string, []byte) {
 		return false, "", []byte{}
 	}
 
-	vcat, found := catalog[string(v)]
+	vcat, found := catalog[v]
 	if found {
 		dat, ok := vcat["server"]
 		if !ok {
 			return false, "", []byte{}
 		}
-		return true, dat.File, dat.MD5
+		return true, dat.File, []byte(dat.MD5)
 	}
 	return false, "", []byte{}
 }
 
 type vercatinfo struct {
 	File string `json:"filename"`
-	MD5  []byte `json:"md5"`
+	MD5  string `json:"md5"`
 }
