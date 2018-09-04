@@ -100,6 +100,7 @@ func (sc *ServerController) logParser() {
 				break
 			} else if err != nil {
 				sc.logs <- &LogMessage{sc.sid, time.Now(), ErrorClass, err.Error()}
+				break // I'll just assume all IO errors mean that the pipe is borked in some way.
 			}
 
 			// Try to parse the line. Failure is possible.
