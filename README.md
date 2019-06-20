@@ -18,7 +18,11 @@ Building is easy. First make sure you have a recent version of Go installed, the
 Change to the directory you want your servers in, and then run:
 
 	go build VSMonitor
-	./VSMonitor          # Run the monitor to generate default config
+
+If this is the first time you have built the monitor in a given directory, run it once to generate a default environment
+and config:
+
+	./VSMonitor
 
 Now download the contents of the `ui` directory in the repository to `./Monitor/ui` (where `.` is where you put the
 `VSMonitor` binary).
