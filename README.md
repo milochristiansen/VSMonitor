@@ -8,16 +8,35 @@ Currently this is quite basic, offering a simple web UI that allows running serv
 commands.
 
 
-Setup:
+Building:
 -----------------------------------------------------------------------------------------------------------------------
 
-Setup is pretty easy.
+Building is easy. First make sure you have a recent version of Go installed, then run:
 
-Unpack the package anywhere you like, then edit `./Monitor/cfg.json`. If at all possible you want to set the `HostName`
-key to the domain name of your server, then set `AutoTLS` to `true`. This will allow your server to automatically get
-the SSL certificates it needs from [Let's Encrypt](https://letsencrypt.org/). This requires you to run the monitor as
-root and makes it use TCP ports 80 and 443. If you cannot satisfy these requirements, you will need to set `Port` and
-put your SSL certificate in `./Monitor/cert.key` and `./Monitor/cert.crt`.
+	go get github.com/milochristiansen/VSMonitor
+
+Change to the directory you want your servers in, and then run:
+
+	go build VSMonitor
+	./VSMonitor          # Run the monitor to generate default config
+
+Now download the contents of the `ui` directory in the repository to `./Monitor/ui` (where `.` is where you put the
+`VSMonitor` binary).
+
+
+Configuring:
+-----------------------------------------------------------------------------------------------------------------------
+
+Once you have a binary in place and ready to run, simply start it to generate the default configuration. This will create
+a few required directories alongside the binary, and create a default config file for you to edit (`./Monitor/cfg.json`).
+
+If at all possible you want to set the `HostName` key to the domain name of your server, then set `AutoTLS` to `true`.
+This will allow your server to automatically get the SSL certificates it needs from [Let's Encrypt](https://letsencrypt.org/).
+This requires you to run the monitor as root and makes it use TCP ports 80 and 443. If you cannot satisfy these
+requirements, you will need to set `Port` and put your SSL certificate in `./Monitor/cert.key` and `./Monitor/cert.crt`.
+
+You cannot run the monitor without SSL! Well, you can, but only if you set `HostName` to `localhost`, in which case you
+can only get to the monitor UI from the same machine it is running on (this is intended for local testing).
 
 Once you have your connection settings finished, go ahead and start the monitor, then open its web UI in your browser.
 Your first order of business is creating a administrator account. To do this, simply enter `:user create "your name"`
@@ -38,7 +57,7 @@ the new version.
 
 Running multiple servers is a bit harder, since each server needs its own port. You will need to edit the server's
 configuration file. By default this will be in `./GameData/<server name> <SID>` where `<server name` is the name you
-	specified when you created the server, and `<SID>` is a unique server ID number.
+specified when you created the server, and `<SID>` is a unique server ID number.
 
 
 When the Server Goes Down
@@ -57,8 +76,8 @@ If you want to restart the server, tell it to `/stop` via the monitor, then when
 If your server hangs and won't listen to commands, you can tell the monitor to `:kill server` and it will force it to
 shut down (hopefully).
 
-If you want to shut the monitor down just `:kill monitor`, this will stop the game server too, but it is strongly
-recommended you `/stop` it first even so.
+If you want to shut the monitor down just `:kill monitor`, this *should* stop the game server(s) too, but it is strongly
+recommended you `/stop` them first so as to have no chance of "orphan" servers.
 
 
 Monitor API
